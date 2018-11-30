@@ -50,6 +50,9 @@ Title|User story用户案例|Importance|Note
 # 不做 Not doing#
 机械臂拥有智能避障的功能
 
+## 清单##
+[产品原型](https://ayasewakaba.github.io/api_AXURE/ "产品原型")
+
 
 ```python
 
