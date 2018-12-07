@@ -1,4 +1,3 @@
-
 # Project Requirements 
 Target release发布日期|11-25-2018
 --|:--:
@@ -59,11 +58,12 @@ Document owner|王汉彦
 用户使用主要功能时，主要使用带有摄像头的电脑，与一条已连接电脑的机械臂。
 
 # 需求 Requirements  
-Title|User story用户案例|Importance|Note
---|:--:
-搬运工|搬运工人需要单独搬运重物时，不需对机械臂编程，用手势与语音的人工智能即可控制|重要|不需要编程技能
-摄像|摄像师利用一些大型摄录机器拍摄时，可直接利用机械学习出来的运动轨迹，而无需再找一个熟悉机械臂控制的人员来操作|重要|制作轨迹
-医生|医生做精密手术的时候，不需要学习控制机械臂|重要|医学领域
+ 
+Title |User story用户案例 |Importance |Note   
+--|:--:|:--:|--: 
+搬运工 |搬运工人需要单独搬运重物时，不需对机械臂编程，用手势与语音的人工智能即可控制 |重要 |不需要编程技能 
+摄像 |摄像师利用一些大型摄录机器拍摄时，可直接利用机械学习出来的运动轨迹，而无需再找一个熟悉机械臂控制的人员来操作 |重要 |制作轨迹  
+医生 |医生做精密手术的时候，不需要学习控制机械臂 |重要 |医学领域  
 
 # 使用者交互及设计: User interaction and design 
 [产品原型](https://ayasewakaba.github.io/api_AXURE/ "产品原型")
@@ -76,8 +76,3 @@ Title|User story用户案例|Importance|Note
 
 ## 清单 
 [产品原型](https://ayasewakaba.github.io/api_AXURE/ "产品原型")
-
-
-```python
-
-```
