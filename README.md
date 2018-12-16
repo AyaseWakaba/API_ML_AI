@@ -20,7 +20,7 @@ Document owner|王汉彦
 现今控制机械臂一般需要熟悉编程，或者利用其他软件辅助，本产品提供一种利用动作捕捉人工智能与语音控制来识别手势从而控制机械臂的软件，使机械臂更加容易被大众运用 
 
 # 用户 
-工程建筑者、摄像师、医生
+摄像师
 
 # 用户痛点 
 很多用户想要用机械臂来改善生产力，但目前大部分机械臂都需要懂得编程与熟悉硬件方面的知识，使门槛变高。
@@ -61,9 +61,7 @@ Document owner|王汉彦
  
 Title |User story用户案例 |Importance |Note   
 --|:--:|:--:|--: 
-搬运工 |搬运工人需要单独搬运重物时，不需对机械臂编程，用手势与语音的人工智能即可控制 |重要 |不需要编程技能 
 摄像 |摄像师利用一些大型摄录机器拍摄时，可直接利用机械学习出来的运动轨迹，而无需再找一个熟悉机械臂控制的人员来操作 |重要 |制作轨迹  
-医生 |医生做精密手术的时候，不需要学习控制机械臂 |重要 |医学领域  
 
 # 使用者交互及设计: User interaction and design 
 [产品原型](https://ayasewakaba.github.io/api_AXURE/ "产品原型")
@@ -74,5 +72,85 @@ Title |User story用户案例 |Importance |Note
 # 不做 Not doing 
 机械臂拥有智能避障的功能
 
+# 代码展示（半成品） 
+ (```) 
+typedef struct _hvState { 
+  int        obj_id;//fixed to a value of zero,indentify the right hand. 
+  /* whether the object is successfully tracked and whether one of the key postures was recognized */ 
+  bool       tracked; 
+  bool       recognized; 
+  /* The location of the tracked object is reported in relative image coordinates,the image origin is in the left upper corner of the image */ 
+  double     center_xpos, center_ypos;//The location of the result of tracking 
+  double     scale; 
+  string     posture;//posture that is recognized 
+  RefTime    tstamp;//time stamp 
+} hvState; 
+/*finite state machines  */ 
+enum hvAction {         // specify recommendations to application: 
+  HV_INVALID_ACTION = 0,// Invalid Action 
+  HV_PROCESS_FRAME = 1, // fully process and display the frame 
+  HV_SKIP_FRAME = 2,    // display but do not further process 
+  HV_DROP_FRAME = 3     // do not display the frame 
+}; 
+/*Initialize or Uninitialize the interface  */ 
+void hvInitialize(int width, int height); 
+void hvUninitialize(); 
+/* Load the config file or judge whether or not it is loaded correctly*/ 
+void hvLoadConductor(const string& filename); 
+bool hvConductorLoaded(); 
+/* start or stop recongnition,default obj_id is 0 (indicates the right hand) */ 
+void hvStartRecognition(int obj_id=0); 
+void hvStopRecognition(int obj_id=0); 
+/* Process the frame,the type IplImage is belong to the OpenCV library */ 
+hvAction hvProcessFrame(IplImage* inOutImage, IplImage* rightImage=NULL); 
+bool hvIsActive();//Judge whether the hv is active 
+/* Asynchronize method of processing the frame */ 
+void hvAsyncSetup(int num_buffers, void (*cb)(IplImage* img, hvAction action)); 
+void hvAsyncGetImageBuffer(IplImage** pImage, int* pBufferID); 
+void hvAsyncProcessFrame(int bufferID); 
+/* Get the State of the hand which is being tracked */ 
+void hvGetState(int obj_id, hvState& state); 
+/* set the area of the hand being detected */ 
+void hvSetDetectionArea(int left, int top, int right, int bottom); 
+/* Get the area of the hand being detected */ 
+void hvGetDetectionArea(int* pLeft, int* pTop, int* pRight, int* pBottom); 
+/* recompute the latency of normal */ 
+void hvRecomputeNormalLatency(); 
+/* Set or Get the amount and verbosity of the overlay */ 
+/* Please refer to the page 90 of the paper  */ 
+void hvSetOverlayLevel(int level); 
+int hvGetOverlayLevel(); 
+/* some operation on correcting the distortion of camrea . 
+* This operation takes a considerable amount of time */ 
+void hvCorrectDistortion(bool enable=true); 
+bool hvIsCorrectingDistortion(); 
+bool hvCanCorrectDistortion(); 
+/* some operation on adjusting the exposure of camrea . 
+For the exposure adjustment to be possible(turned on via SetAdjustExposure), 
+HandVu must have been initialized with the CameraController!=NULL.*/ 
+void hvSetAdjustExposure(bool enable=true); 
+bool hvCanAdjustExposure(); 
+bool hvIsAdjustingExposure(); 
+/* Set the log file */ 
+void hvSetLogfile(const string& filename); 
+/* Save the related picture  */ 
+void hvSaveScannedArea(IplImage* pImg, string& picfile); 
+void hvSaveImageArea(IplImage* pImg, int left, int top, int right, int bottom, string& picfile); 
+void hvSetSaveFilenameRoot(const string& fname_root); 
+void hvSetDoTrack(bool do_track); 
+/* Set or Start the Open Sound Control (OSC) Server or Gesture Server defined by the author */ 
+/* For Open Sound Control (OSC), Please refer to the page 93 of the paper */ 
+/* For the Gesture Server, Please erfer to the page 94 of the paper */ 
+void hvStartGestureServer(int port, int max_num_clients=10); 
+void hvStartOSCServer(const string& desthost, int destport); 
+void hvStopGestureServer(int port); 
+void hvStopOSCServer(const string& desthost, int destport); 
+/** verbosity: 0 minimal, 3 maximal 
+*/ 
+void hvGetVersion(string& version, int verbosity);
+
+ (```) 
+
 ## 清单 
 [产品原型](https://ayasewakaba.github.io/api_AXURE/ "产品原型")
+
