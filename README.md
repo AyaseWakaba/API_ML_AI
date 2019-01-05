@@ -78,16 +78,8 @@ Title |User story用户案例 |Importance |Note
 * 机械臂拥有智能避障的功能 
 * 真的做出一个机械臂
 # 产品流程图
-```flow
-st=>start: 用户摆出手势
-op1=>operation: HandVu将手势识别出“OPEN”、"CLOSE"、“Lpalm”、“Lback”等手势结果
-op2=>operation: 使用HandVu手势结果对应提前设置好的预设映射到Arduino上
-cond=>condition: Arduino接收到预设信号让机械臂摆出用户的手势
-e=>end
-st->op1->op2->cond
-cond(yes)->e
-cond(no)->op
-&``` 
+http://s4.sinaimg.cn/mw690/003yKU8wzy7qxLLpIivb3&690
+![api](http://s4.sinaimg.cn/mw690/003yKU8wzy7qxLLpIivb3&690 "0")
 
 # 代码展示及可行性分析
 ## HandVu输入输出展示
