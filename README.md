@@ -77,7 +77,27 @@ Title |User story用户案例 |Importance |Note
 # 不做 Not doing 
 * 机械臂拥有智能避障的功能 
 * 真的做出一个机械臂
-# 代码展示
+# 产品流程图
+```flow
+st=>start: 用户摆出手势
+op1=>operation: HandVu将手势识别出“OPEN”、"CLOSE"、“Lpalm”、“Lback”等手势结果
+op2=>operation: 使用HandVu手势结果对应提前设置好的预设映射到Arduino上
+cond=>condition: Arduino接收到预设信号让机械臂摆出用户的手势
+e=>end
+st->op1->op2->cond
+cond(yes)->e
+cond(no)->op
+&
+``` 
+
+# 代码展示及可行性分析
+## HandVu输入输出展示
+如图所示，HandVu会将识别到的手势输出为“OPEN”、"CLOSE"、“Lpalm”、“Lback”等手势结果。
+![handvu1](http://s13.sinaimg.cn/mw690/003yKU8wzy7qxKaYcSUbc&690 "1")
+![handvu2](http://s3.sinaimg.cn/mw690/003yKU8wzy7qxKbcds6d2&690 "2")
+![handvu3](http://s5.sinaimg.cn/mw690/003yKU8wzy7qxKb6zCkd4&690 "3")
+
+## HandVu代码
 ```
 * HandVu - a library for computer vision-based hand gesture
 * recognition.
@@ -347,6 +367,78 @@ int main( int argc, char** argv )
   return 0;
 }
 ```
+## 输出——Arduino开源的机械臂项目
+### 映射机制
+映射机制主要涉及到3个步骤：
+1.  通过芯片版的模拟信号输入口读取固定电阻两端的电压。反馈读数应介于是0-1023之间的整数，分别对应0-5V的信号电压。
+对应代码：
+
+     sensorValue1 = analogRead(analogInPin1);
+     sensorValue2 = analogRead(analogInPin2);
+     sensorValue3 = analogRead(analogInPin3);
+     sensorValue4 = analogRead(analogInPin4);
+此段代码作用为读取各个模拟口数值并赋值给对应整形参数。
+
+2.  基于舵机初始的安装朝向，将悬臂处于不同位置所对应电位器的电压值映射至想要的舵机角度参数值。
+
+3.  最后将参数值以PWM的形式从数字输出口输出，以控制舵机运动。
+对应代码：
+
+     Base.write(map(sensorValue1, 200, 500, 45, 150));
+Joint1.write(map(sensorValue2, 680, 300, 130, 50));
+      Joint2.write(map(sensorValue3, 800, 400, 30,140));
+      Grabber.write(map(sensorValue4, 250, 320,180, 80));
+代码中的map() 函数用于将模拟接口读数映射至舵机角度参数，XXX.write() 函数将控制参数输出值对应数字信号口舵机。
+
+```
+#include <Servo.h>
+Servo Base;
+Servo Joint1;
+Servo Joint2;
+Servo Grabber;
+const int analogInPin1 =A1;  // Analog input pin that thepotentiometer is attached to
+const int analogInPin2 =A2;  // Analog input pin that thepotentiometer is attached to
+const int analogInPin3 =A3;  // Analog input pin that thepotentiometer is attached to
+const int analogInPin4 =A4;  // Analog input pin that thepotentiometer is attached to
+int sensorValue1 = 0;        // value read from the pot
+int sensorValue2 = 0;        // value read from the pot
+int sensorValue3 = 0;        // value read from the pot
+int sensorValue4 = 0;        // value read from the pot
+void setup() {
+  // initialize serial communications at 9600bps:
+  Serial.begin(9600);
+  Base.attach(3);
+  Joint1.attach(4);
+  Joint2.attach(5);
+  Grabber.attach(6);
+}
+void loop() {
+  // read the analog in value:
+  sensorValue1 = analogRead(analogInPin1);
+  sensorValue2 = analogRead(analogInPin2);
+  sensorValue3 = analogRead(analogInPin3);
+  sensorValue4 = analogRead(analogInPin4);
+  // print the results to the serial monitor:
+  Serial.print("\nBase Joint:" );
+  Serial.print(sensorValue1);
+  Serial.print("  Bottom Joint =" );
+  Serial.print(sensorValue2);
+  Serial.print("  Upper Joint =" );
+  Serial.print(sensorValue3);
+  Serial.print("  Grabber =" );
+  Serial.print(sensorValue4);
+  // map the results to servo control parameter
+  Base.write(map(sensorValue1, 200, 500, 45,150));
+  Joint1.write(map(sensorValue2, 680, 300, 130,50));
+  Joint2.write(map(sensorValue3, 800, 400, 30,140));
+  Grabber.write(map(sensorValue4, 250, 320,180, 80));
+}
+代码部分仅用到Arduino自带示例中舵机驱动的库，Servo.h。 代码仅涉及到赋值和映射，所以关于C语言原理部分不多赘述。
+
+```
+## 可行性分析
+#### HandVu能识别到正反面与各手指动作，但不能识别到手部的侧面，那么本产品将使用摇杆遥控与手势识别结合。先将HandVu所能识别到的全部手势，在程序里预设好一每个舵机角度与电机信号。当用户摆出手势时，本产品先用HandVu识别出手势，再利用程序中设置好的预设来控制机械臂，由用户利用本程序的舵机遥控控制机械臂的角度。
+
 
 ## 清单 
 [产品原型](https://ayasewakaba.github.io/api_AXURE/ "产品原型")
